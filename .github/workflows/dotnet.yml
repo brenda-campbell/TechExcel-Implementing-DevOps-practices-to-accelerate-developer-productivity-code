@@ -96,7 +96,7 @@ jobs:
 
     - uses: azure/webapps-deploy@v2
       with:
-        app-name: 's3fb2e2jdcypw-test'
+        app-name: 's3fb2e2jdcypw-dev-test'
         images: s3fb2e2jdcypwmpnpreg.azurecr.io/techboost/dotnetcoreapp:${{github.run_number}}
 
   deploy-to-prod:
@@ -117,5 +117,5 @@ jobs:
 
     - uses: azure/webapps-deploy@v2
       with:
-        app-name: 's3fb2e2jdcypw-prod'
+        app-name: 's3fb2e2jdcypw-dev-prod'
         images: s3fb2e2jdcypwmpnpreg.azurecr.io/techboost/dotnetcoreapp:${{github.run_number}}
