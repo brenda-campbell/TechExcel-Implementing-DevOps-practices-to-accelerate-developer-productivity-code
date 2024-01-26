@@ -1,5 +1,11 @@
 name: .NET CI
 
+env:
+  registryName: s3fb2e2jdcypwmpnpreg.azurecr.io
+  repositoryName: techboost/dotnetcoreapp
+  dockerFolderPath: ./Application/src/RazorPagesTestSample
+  tag: ${{github.run_number}}
+  
 on:
   push:
     branches: [ main ]
@@ -52,3 +58,64 @@ jobs:
       
     - name: Docker Push
       run: docker push $registryName/$repositoryName:$tag
+
+  deploy-to-dev:  
+    runs-on: ubuntu-latest
+    needs: dockerBuildPush
+    
+    environment:
+      name: dev
+      url: https://s3fb2e2jdcypw-dev.azurewebsites.net/
+    
+    steps:
+      - name: 'Login via Azure CLI'
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - uses: azure/webapps-deploy@v2
+        with:
+          app-name: 's3fb2e2jdcypw-dev'
+          images: s3fb2e2jdcypwmpnpreg.azurecr.io/techboost/dotnetcoreapp:${{github.run_number}}
+
+  deploy-to-test:
+  
+    runs-on: ubuntu-latest
+    needs: deploy-to-dev
+    environment:
+      name: test
+      url: https://s3fb2e2jdcypw-test.azurewebsites.net/
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: 'Login via Azure CLI'
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - uses: azure/webapps-deploy@v2
+      with:
+        app-name: 's3fb2e2jdcypw-test'
+        images: s3fb2e2jdcypwmpnpreg.azurecr.io/techboost/dotnetcoreapp:${{github.run_number}}
+
+  deploy-to-prod:
+  
+    runs-on: ubuntu-latest
+    needs: deploy-to-test
+    environment:
+      name: prod
+      url: https://s3fb2e2jdcypw-prod.azurewebsites.net/
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: 'Login via Azure CLI'
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - uses: azure/webapps-deploy@v2
+      with:
+        app-name: 's3fb2e2jdcypw-prod'
+        images: s3fb2e2jdcypwmpnpreg.azurecr.io/techboost/dotnetcoreapp:${{github.run_number}}
