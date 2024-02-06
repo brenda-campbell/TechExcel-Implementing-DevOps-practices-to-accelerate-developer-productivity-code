@@ -50,7 +50,7 @@ resource "azurerm_container_registry" "container_registry" {
   admin_enabled       = true
 }
 
-resource "azurerm_service_plan" "app_service_plan" {
+resource "azurerm_app_service_plan" "app_service_plan" {
   name                = local.appServicePlanName
   location            = data.azurerm_resource_group.current.location
   resource_group_name = data.azurerm_resource_group.current.name
@@ -60,13 +60,14 @@ resource "azurerm_service_plan" "app_service_plan" {
     tier = "Standard"
     size = local.sku
   }
+  # Remove the 'os_type' attribute
 }
 
 resource "azurerm_app_service" "app_service_app" {
   name                = local.webAppName
   location            = data.azurerm_resource_group.current.location
   resource_group_name = data.azurerm_resource_group.current.name
-  app_service_plan_id = azurerm_service_plan.app_service_plan.id
+  app_service_plan_id = azurerm_app_service_plan.app_service_plan.id
   https_only          = true
   client_affinity_enabled = false
 
