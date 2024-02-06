@@ -4,7 +4,9 @@ variable "environment" {
   default     = "dev"
 }
 
-data "azurerm_resource_group" "current" {}
+data "azurerm_resource_group" "current" {
+ name = "MUY_TEST_RG"
+}
 
 locals {
   webAppName         = "${random_string.rs.result}-${var.environment}"
