@@ -4,8 +4,12 @@ variable "environment" {
   default     = "dev"
 }
 
+provider "azurerm" {
+  features {}
+}
+
 data "azurerm_resource_group" "current" {
- name = "MUY_TEST_RG"
+ name = "MY_TEST_RG"
 }
 
 locals {
