@@ -1,0 +1,45 @@
+on:
+  workflow_dispatch
+
+permissions:
+  id-token: write
+  contents: read
+  
+env:
+  targetEnv: dev
+
+name: Deploy with Terraform
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+    # Checkout code
+    - uses: actions/checkout@v2
+
+    # Log into Azure
+    - uses: azure/login@v1
+      with:
+        client-id: ${{ secrets.AZURE_CLIENT_ID }}
+        tenant-id: ${{ secrets.TENANT_ID }}
+        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        enable-AzPSSession: false # Terraform does not need Az PowerShell session
+
+    # Setup Terraform
+    - uses: hashicorp/setup-terraform@v1
+      with:
+        terraform_version: latest
+
+    # Terraform Init
+    - name: Terraform Init
+      run: terraform init
+      working-directory: ./InfrastructureAsCode
+
+    # Terraform Plan
+    - name: Terraform Plan
+      run: terraform plan -out=tfplan -var="environment=${{ env.targetEnv }}"
+      working-directory: ./InfrastructureAsCode
+
+    # Terraform Apply
+    - name: Terraform Apply
+      run: terraform apply -auto-approve tfplan
+      working-directory: ./InfrastructureAsCode
