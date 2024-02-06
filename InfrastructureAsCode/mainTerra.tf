@@ -57,10 +57,9 @@ resource "azurerm_app_service_plan" "app_service_plan" {
   kind                = "linux"
   reserved            = true
   sku {
-    tier = "Standard"
+    tier = "Free"
     size = local.sku
   }
-  # Remove the 'os_type' attribute
 }
 
 resource "azurerm_app_service" "app_service_app" {
