@@ -66,4 +66,32 @@ resource "azurerm_app_service" "app_service_app" {
   resource_group_name = data.azurerm_resource_group.current.name
   app_service_plan_id = azurerm_app_service_plan.app_service_plan.id
   https_only          = true
-  client_aff
+  client_affinity_enabled = false
+
+  site_config {
+    linux_fx_version = "DOCKER|${azurerm_container_registry.container_registry.login_server}/${local.imageName}"
+    http2_enabled    = true
+    min_tls_version  = "1.2"
+    app_command_line = local.startupCommand
+  }
+
+  app_settings = {
+    "WEBSITES_ENABLE_APP_SERVICE_STORAGE" = "false"
+    "DOCKER_REGISTRY_SERVER_URL"          = "https://${azurerm_container_registry.container_registry.login_server}"
+    "DOCKER_REGISTRY_SERVER_USERNAME"     = azurerm_container_registry.container_registry.admin_username
+    "DOCKER_REGISTRY_SERVER_PASSWORD"     = azurerm_container_registry.container_registry.admin_password
+    "APPINSIGHTS_INSTRUMENTATIONKEY"      = azurerm_application_insights.app_insights.instrumentation_key
+  }
+}
+
+output "application_name" {
+  value = azurerm_app_service.app_service_app.name
+}
+
+output "application_url" {
+  value = azurerm_app_service.app_service_app.default_site_hostname
+}
+
+output "container_registry_name" {
+  value = azurerm_container_registry.container_registry.name
+}
